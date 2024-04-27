@@ -1,20 +1,12 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.16)
 project(serial)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED YES)
 
-# Group number
-set(GROUP_NO 00 CACHE STRING "Your group number (two digits)")
-
-# Packaging system
-if (NOT ${GROUP_NO} STREQUAL 00)
-    set(CPACK_GENERATOR TGZ)
-    set(CPACK_PACKAGE_FILE_NAME "CS5220Group${GROUP_NO}_hw2")
-    install(FILES serial.cpp DESTINATION .)
-    install(FILES ${CPACK_PACKAGE_FILE_NAME}.pdf DESTINATION .)
-    include(CPack)
-endif ()
+# set(CMAKE_CXX_FLAGS "-Wall -Wextra")
+# set(CMAKE_CXX_FLAGS_DEBUG "-g")
+# set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 # We require the GNU compiler for this assignment.
 if (NOT "${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
