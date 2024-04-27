@@ -9,6 +9,7 @@
 #include <iostream>
 #include <fstream>
 #include <complex>
+#include <chrono>
 
 // Function to determine if a point is in the Mandelbrot set
 int mandelbrot(const std::complex<double> &c, int max_iterations)
@@ -31,6 +32,8 @@ int map_color(int iterations, int max_iterations)
 
 int main()
 {
+  auto start = std::chrono::high_resolution_clock::now();
+
   // Image dimensions and parameters
   const int width = 800;
   const int height = 800;
@@ -61,6 +64,12 @@ int main()
   }
 
   image.close();
+
+  auto end = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<double> elapsed = end - start;
+
   std::cout << "Mandelbrot image created: mandelbrot.ppm\n";
+  std::cout << "Time taken to generate image: " << elapsed.count() << " seconds\n";
+
   return 0;
 }
