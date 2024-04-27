@@ -30,23 +30,8 @@ int map_color(int iterations, int max_iterations)
   return (iterations * 255) / max_iterations;
 }
 
-int main()
-{
-  auto start = std::chrono::high_resolution_clock::now();
-
-  // Image dimensions and parameters
-  const int width = 800;
-  const int height = 800;
-  const double x_min = -2.0, x_max = 1.0;
-  const double y_min = -1.5, y_max = 1.5;
-  const int max_iterations = 1000;
-
-  // Create a PPM file
-  std::ofstream image("mandelbrot.ppm");
-  image << "P3\n"
-        << width << " " << height << "\n255\n";
-
-  // Generate the Mandelbrot set
+std::vector<int> generate_mandelbrot_set(int width, int height, double x_min, double x_max, double y_min, double y_max, int max_iterations) {
+  std::vector<int> mandelbrot_set(width * height);
   for (int y = 0; y < height; ++y)
   {
     double imag = y_min + (y_max - y_min) * y / (height - 1);
@@ -55,18 +40,46 @@ int main()
       double real = x_min + (x_max - x_min) * x / (width - 1);
       std::complex<double> c(real, imag);
       int iterations = mandelbrot(c, max_iterations);
-      int color = map_color(iterations, max_iterations);
+      mandelbrot_set[y * width + x] = map_color(iterations, max_iterations);
+    }
+  }
+  return mandelbrot_set;
 
-      // Output RGB values (grayscale in this example)
-      image << color << " " << color << " " << color << " ";
+}
+
+int main()
+{
+  auto gen_start = std::chrono::high_resolution_clock::now();
+
+  // Image dimensions and parameters
+  const int width = 1200;
+  const int height = 1200;
+  const double x_min = -2.0, x_max = 1.0;
+  const double y_min = -1.5, y_max = 1.5;
+  const int max_iterations = 1000;
+
+  // Generate the Mandelbrot set
+  std::vector<int> mandelbrot_set = generate_mandelbrot_set(width, height, x_min, x_max, y_min, y_max, max_iterations);
+
+  auto gen_end = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<double> elapsed = gen_end - gen_start;
+
+  std::cout << "Time taken to generate mandelbrot set: " << elapsed.count() << " seconds\n";
+
+  // Create a PPM file
+  std::ofstream image("mandelbrot1.ppm");
+  image << "P3\n"
+        << width << " " << height << "\n255\n";
+
+  for (int y = 0; y < height; ++y){
+    for (int x = 0; x < width; ++x){
+      image << mandelbrot_set[y * width + x] << " " << mandelbrot_set[y * width + x] << " " << mandelbrot_set[y * width + x] << " ";
     }
     image << "\n";
   }
 
   image.close();
 
-  auto end = std::chrono::high_resolution_clock::now();
-  std::chrono::duration<double> elapsed = end - start;
 
   std::cout << "Mandelbrot image created: mandelbrot.ppm\n";
   std::cout << "Time taken to generate image: " << elapsed.count() << " seconds\n";
