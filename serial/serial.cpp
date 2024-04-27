@@ -1,35 +1,45 @@
+#include "common.h"
 #include <iostream>
+#include <fstream>
+#include <complex>
+#include <chrono>
 
 #define MAX_ITER 1000
 #define WIDTH 800
 #define HEIGHT 600
 
-// Function to compute if a point is in the Mandelbrot set
-int compute_point(double x, double y) {
-    double z_re = x, z_im = y;
-    int n;
-    for (n = 0; n < MAX_ITER; ++n) {
-        if (z_re * z_re + z_im * z_im > 4)
-            break;
-        double new_re = z_re * z_re - z_im * z_im;
-        double new_im = 2 * z_re * z_im;
-        z_re = new_re + x;
-        z_im = new_im + y;
+// Function to determine if a point is in the Mandelbrot set
+int mandelbrot(const std::complex<double> &c, int max_iterations)
+{
+    std::complex<double> z = 0;
+    int iterations = 0;
+    while (std::norm(z) <= 4 && iterations < max_iterations)
+    {
+        z = z * z + c;
+        ++iterations;
     }
-    return n;
+    return iterations;
 }
 
-// Main function to render the Mandelbrot set
-void render() {
-    for (int y = 0; y < HEIGHT; y++) {
-        for (int x = 0; x < WIDTH; x++) {
-            double x_scaled = (x - WIDTH / 2.0) * 4.0 / WIDTH;
-            double y_scaled = (y - HEIGHT / 2.0) * 4.0 / HEIGHT;
-            int iteration = compute_point(x_scaled, y_scaled);
-            if (iteration == MAX_ITER) std::cout << ".";
-            else std::cout << " ";
+// Function to map iterations to grayscale color
+int map_color(int iterations, int max_iterations)
+{
+    return (iterations * 255) / max_iterations;
+}
+
+std::vector<int> generate_mandelbrot_set(int width, int height, double x_min, double x_max, double y_min, double y_max, int max_iterations)
+{
+    std::vector<int> mandelbrot_set(width * height);
+    for (int y = 0; y < height; ++y)
+    {
+        double imag = y_min + (y_max - y_min) * y / (height - 1);
+        for (int x = 0; x < width; ++x)
+        {
+            double real = x_min + (x_max - x_min) * x / (width - 1);
+            std::complex<double> c(real, imag);
+            int iterations = mandelbrot(c, max_iterations);
+            mandelbrot_set[y * width + x] = map_color(iterations, max_iterations);
         }
-        std::cout << std::endl;
     }
+    return mandelbrot_set;
 }
-
