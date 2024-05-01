@@ -4,9 +4,9 @@
 #include <vector>
 #include <complex>
 
-#define MAX_ITER 1000
-#define WIDTH 1200
-#define HEIGHT 1200
+#define MAX_ITER 2000
+#define WIDTH 2000
+#define HEIGHT 2000
 #define NUM_ROWS 4
 
 struct Color {
@@ -19,16 +19,15 @@ struct Color {
     }
 };
 
-int mandelbrot(const std::complex<double> &c, int max_iterations);
+int mandelbrot(const std::complex<double> &c);
 
-int map_color(const std::vector<Color>& center_colors, int iterations, int max_iterations);
+int map_color(const std::vector<Color>& center_colors, int iterations);
 
 std::vector<Color> generate_mandelbrot_set(
     double x_min,
     double x_max,
     double y_min,
     double y_max,
-    int max_iterations,
     const std::vector<Color>& center_colors);
 
 

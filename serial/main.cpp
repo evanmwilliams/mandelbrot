@@ -34,15 +34,13 @@ int main()
   const int max_iterations = 1000;
   
   std::vector<Color> center_colors = assign_colors();
-  std::cout << "Center colors size: " << center_colors.size() << " and colors[0] is " << center_colors[0].r <<  std::endl;
+  //std::cout << "Center colors size: " << center_colors.size() << " and colors[0] is " << center_colors[0].r <<  std::endl;
   // Generate the Mandelbrot set
-  auto mandelbrot_set = generate_mandelbrot_set(x_min, x_max, y_min, y_max, max_iterations, center_colors);
+  auto mandelbrot_set = generate_mandelbrot_set(x_min, x_max, y_min, y_max, center_colors);
 
 
   auto gen_end = std::chrono::high_resolution_clock::now();
   std::chrono::duration<double> elapsed = gen_end - gen_start;
-
-  std::cout << "Time taken to generate mandelbrot set: " << elapsed.count() << " seconds\n";
 
   // Create a PPM file
   std::ofstream image("mandelbrot1.ppm");
@@ -65,7 +63,7 @@ int main()
 
   image.close();
 
-  std::cout << "Mandelbrot image created: mandelbrot.ppm\n";
+  std::cout << "Mandelbrot image created: mandelbrot1.ppm\n";
   std::cout << "Time taken to generate image: " << elapsed.count() << " seconds\n";
 
   return 0;

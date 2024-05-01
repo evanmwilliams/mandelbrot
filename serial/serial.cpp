@@ -11,11 +11,11 @@ int map_pixel_to_row(int pixel_y) {
 
 
 // Function to determine if a point is in the Mandelbrot set
-int mandelbrot(const std::complex<double> &c, int max_iterations)
+int mandelbrot(const std::complex<double> &c)
 {
     std::complex<double> z = 0;
     int iterations = 0;
-    while (std::norm(z) <= 4 && iterations < max_iterations)
+    while (std::norm(z) <= 4 && iterations < MAX_ITER)
     {
         z = z * z + c;
         ++iterations;
@@ -37,9 +37,9 @@ Color lerp(Color top, Color bot, int t, int max_t) {
 }
 
 // Function to map iterations to grayscale color
-Color map_color(const std::vector<Color>& center_colors, int iterations, int max_iterations, int y_pixel)
+Color map_color(const std::vector<Color>& center_colors, int iterations, int y_pixel)
 {
-    if(iterations < max_iterations) {
+    if(iterations < MAX_ITER) {
         return {0, 0, 0};
     }
     //std::cout << "Mapping color for pixel " << y_pixel << std::endl;
@@ -69,7 +69,7 @@ Color map_color(const std::vector<Color>& center_colors, int iterations, int max
     } else {
         int dist_to_center = y_pixel - center_pixel_y;
         int dist_to_above = dist_to_center;
-        std::cout << "Dist to center: " << dist_to_center << std::endl;
+        //std::cout << "Dist to center: " << dist_to_center << std::endl;
         if(below_row == proc_row) {
             // fade to white
             return lerp(center_colors[proc_row], {255, 255, 255}, dist_to_center, dist_between_proc);
@@ -80,7 +80,7 @@ Color map_color(const std::vector<Color>& center_colors, int iterations, int max
     }
 }
 
-std::vector<Color> generate_mandelbrot_set(double x_min, double x_max, double y_min, double y_max, int max_iterations, const std::vector<Color>& center_colors)
+std::vector<Color> generate_mandelbrot_set(double x_min, double x_max, double y_min, double y_max, const std::vector<Color>& center_colors)
 {
     std::vector<Color> mandelbrot_set(WIDTH * HEIGHT);
     for (int y = 0; y < HEIGHT; ++y)
@@ -90,8 +90,8 @@ std::vector<Color> generate_mandelbrot_set(double x_min, double x_max, double y_
         {
             double real = x_min + (x_max - x_min) * x / (WIDTH - 1);
             std::complex<double> c(real, imag);
-            int iterations = mandelbrot(c, max_iterations);
-            mandelbrot_set[y * WIDTH + x] = map_color(center_colors, iterations, max_iterations, y);
+            int iterations = mandelbrot(c);
+            mandelbrot_set[y * WIDTH + x] = map_color(center_colors, iterations, y);
         }
     }
     return mandelbrot_set;
