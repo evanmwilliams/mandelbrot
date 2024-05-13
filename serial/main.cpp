@@ -4,6 +4,8 @@
 #include <complex>
 #include <chrono>
 
+#define HISTOGRAM 1
+
 std::vector<Color> assign_colors() {
     std::vector<Color> colors;
     for (int i = 0; i < NUM_ROWS; i++) {
@@ -36,8 +38,13 @@ int main()
   std::vector<Color> center_colors = assign_colors();
   //std::cout << "Center colors size: " << center_colors.size() << " and colors[0] is " << center_colors[0].r <<  std::endl;
   // Generate the Mandelbrot set
-  auto mandelbrot_set = generate_mandelbrot_set(x_min, x_max, y_min, y_max, center_colors);
-
+  std::vector<Color> mandelbrot_set;
+  if(HISTOGRAM) {
+    std::vector<int> mandelbrot = generate_mandelbrot_set_histogram(x_min, x_max, y_min, y_max);
+    mandelbrot_set = color_histogram(mandelbrot, center_colors);
+  } else {
+    mandelbrot_set = generate_mandelbrot_set(x_min, x_max, y_min, y_max, center_colors);
+  }
 
   auto gen_end = std::chrono::high_resolution_clock::now();
   std::chrono::duration<double> elapsed = gen_end - gen_start;

@@ -96,3 +96,61 @@ std::vector<Color> generate_mandelbrot_set(double x_min, double x_max, double y_
     }
     return mandelbrot_set;
 }
+
+std::vector<int> generate_mandelbrot_set_histogram(double x_min, double x_max, double y_min, double y_max)
+{
+    std::vector<int> mandelbrot_set(WIDTH * HEIGHT);
+    for (int y = 0; y < HEIGHT; ++y)
+    {
+        double imag = y_min + (y_max - y_min) * y / (HEIGHT - 1);
+        for (int x = 0; x < WIDTH; ++x)
+        {
+            double real = x_min + (x_max - x_min) * x / (WIDTH - 1);
+            std::complex<double> c(real, imag);
+            int iterations = mandelbrot(c);
+            mandelbrot_set[y * WIDTH + x] = iterations;
+        }
+    }
+    return mandelbrot_set;
+}
+
+std::vector<Color> color_histogram(const std::vector<int>& mandelbrot_set, const std::vector<Color>& palette) {
+    std::vector<int> iterations_pp(MAX_ITER + 1, 0);
+    float total_before_bail = 0.0;
+    for (int i = 0; i < WIDTH * HEIGHT; ++i) {
+        iterations_pp[mandelbrot_set[i]]++;
+        if(mandelbrot_set[i] < MAX_ITER) {
+            total_before_bail+=1.0;
+        }
+    }
+    std::vector<std::vector<float>> hue(WIDTH, std::vector<float>(HEIGHT, 0.0));
+    for (int x = 0; x < WIDTH; x++){
+        for (int y = 0; y < HEIGHT; y++) {
+            int iteration = mandelbrot_set[y * WIDTH + x];
+            for (int i = 0; i <= iteration; i++) {
+                hue[x][y] += iterations_pp[i] / total_before_bail;
+            }
+        }
+    }
+
+    std::vector<Color> mandelbrot_colored(WIDTH * HEIGHT);
+    for (int m = 0; m < WIDTH; m++) {
+        for (int n = 0; n < HEIGHT; n++) {
+            Color color;
+            if (hue[m][n] < 0.2) {
+                color = palette[0];
+            } else if (hue[m][n] < 0.4) {
+                color = palette[1];
+            } else if (hue[m][n] < 0.6) {
+                color = palette[2];
+            } else if (hue[m][n] < 0.9) {
+                color = palette[3];
+            } else {
+                color = palette[4];
+            }
+            mandelbrot_colored[n * WIDTH + m] = color;
+        }
+    }
+    return mandelbrot_colored;
+}
+
