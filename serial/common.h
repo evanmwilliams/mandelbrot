@@ -36,7 +36,8 @@ std::vector<int> generate_mandelbrot_set_histogram(
     double y_min,
     double y_max);
 
-std::vector<Color> color_histogram(const std::vector<int>& mandelbrot_set, const std::vector<Color>& palette);
+std::vector<Color> color_histogram(const std::vector<int>& mandelbrot_set, 
+                                   const std::vector<Color>& palette);
 
 
 /*

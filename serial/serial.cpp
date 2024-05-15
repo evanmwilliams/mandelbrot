@@ -9,7 +9,6 @@ int map_pixel_to_row(int pixel_y) {
     return pixel_y * NUM_ROWS / HEIGHT;
 }
 
-
 // Function to determine if a point is in the Mandelbrot set
 int mandelbrot(const std::complex<double> &c)
 {
@@ -143,7 +142,7 @@ std::vector<Color> color_histogram(const std::vector<int>& mandelbrot_set, const
                 color = palette[1];
             } else if (hue[m][n] < 0.6) {
                 color = palette[2];
-            } else if (hue[m][n] < 0.9) {
+            } else if (hue[m][n] < 0.96) {
                 color = palette[3];
             } else {
                 color = palette[4];

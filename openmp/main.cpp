@@ -16,7 +16,7 @@ int main()
   const int max_iterations = 1000;
 
   // Generate the Mandelbrot set
-  std::vector<int> mandelbrot_set = generate_mandelbrot_set(width, height, x_min, x_max, y_min, y_max, max_iterations);
+  std::vector<Color> mandelbrot_set = generate_mandelbrot_set(x_min, x_max, y_min, y_max, gradient_samples);
 
   auto gen_end = std::chrono::high_resolution_clock::now();
   std::chrono::duration<double> elapsed = gen_end - gen_start;
@@ -26,13 +26,14 @@ int main()
   // Create a PPM file
   std::ofstream image("mandelbrot1.ppm");
   image << "P3\n"
-        << width << " " << height << "\n255\n";
+        << WIDTH << " " << HEIGHT << "\n255\n";
 
-  for (int y = 0; y < height; ++y)
+  for (int y = 0; y < HEIGHT; ++y)
   {
-    for (int x = 0; x < width; ++x)
+    for (int x = 0; x < WIDTH; ++x)
     {
-      image << mandelbrot_set[y * width + x] << " " << mandelbrot_set[y * width + x] << " " << mandelbrot_set[y * width + x] << " ";
+      Color c = mandelbrot_set[y * WIDTH + x];
+      image << c.r << " " << c.g << " " << c.b << " ";
     }
     image << "\n";
   }
