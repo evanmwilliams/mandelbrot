@@ -5,8 +5,8 @@
 #include <complex>
 
 #define MAX_ITER 1000
-#define WIDTH 1000
-#define HEIGHT 1000
+#define WIDTH 3600
+#define HEIGHT 3600
 #define NUM_ROWS 4
 
 struct Color {

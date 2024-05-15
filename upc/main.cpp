@@ -27,6 +27,7 @@ std::vector<Color> assign_colors() {
 
 int main()
 {
+  upcxx::init();
   auto gen_start = std::chrono::high_resolution_clock::now();
 
   // Image dimensions and parameters
@@ -47,30 +48,32 @@ int main()
 
   auto gen_end = std::chrono::high_resolution_clock::now();
   std::chrono::duration<double> elapsed = gen_end - gen_start;
+  upcxx::finalize();
 
+  if(upcxx::rank_me() == 0) {
   // Create a PPM file
-  std::ofstream image("mandelbrot1.ppm");
-  image << "P3\n"
-        << WIDTH << " " << HEIGHT << "\n255\n";
-
-  for (int y = 0; y < HEIGHT; ++y)
-  {
-    for (int x = 0; x < WIDTH; ++x)
+    std::ofstream image("mandelbrot1.ppm");
+    image << "P3\n"
+          << WIDTH << " " << HEIGHT << "\n255\n";
+  
+    for (int y = 0; y < HEIGHT; ++y)
     {
-      Color c = mandelbrot_set[y * WIDTH + x];
-      //if (x % 100 == 0 && y % 100 == 0)
-      //  std::cout << "Color: " << c.r << " " << c.g << " " << c.b << std::endl;
-      image << c.r << " " << c.g << " " << c.b << " ";
-      //image << 255 << " " << 0 << " " << 0 << " ";
-
+      for (int x = 0; x < WIDTH; ++x)
+      {
+        Color c = mandelbrot_set[y * WIDTH + x];
+        //if (x % 100 == 0 && y % 100 == 0)
+        //  std::cout << "Color: " << c.r << " " << c.g << " " << c.b << std::endl;
+        image << c.r << " " << c.g << " " << c.b << " ";
+        //image << 255 << " " << 0 << " " << 0 << " ";
+  
+      }
+      image << "\n";
     }
-    image << "\n";
+  
+    image.close();
+  
+    std::cout << "Mandelbrot image created: mandelbrot1.ppm\n";
+    std::cout << "Time taken to generate image: " << elapsed.count() << " seconds\n";
   }
-
-  image.close();
-
-  std::cout << "Mandelbrot image created: mandelbrot1.ppm\n";
-  std::cout << "Time taken to generate image: " << elapsed.count() << " seconds\n";
-
   return 0;
 }
