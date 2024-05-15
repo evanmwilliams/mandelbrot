@@ -3,6 +3,7 @@
 #include <fstream>
 #include <complex>
 #include <chrono>
+#include <upcxx/upcxx.hpp>
 
 #define HISTOGRAM 1
 
