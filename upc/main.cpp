@@ -12,7 +12,6 @@ std::vector<Color> assign_colors() {
     for (int i = 0; i < NUM_ROWS; i++) {
         // randomly sample a color from the gradient
         int color_idx = rand() % gradient_samples.size();
-        std::cout << "Color index: " << color_idx << std::endl;
         Color color = gradient_samples[color_idx];
         colors.push_back(color);
     }
@@ -41,8 +40,7 @@ int main()
   // Generate the Mandelbrot set
   std::vector<Color> mandelbrot_set;
   if(HISTOGRAM) {
-    std::vector<int> mandelbrot = generate_mandelbrot_set_histogram(x_min, x_max, y_min, y_max);
-    mandelbrot_set = color_histogram(mandelbrot, center_colors);
+    mandelbrot_set = generate_mandelbrot_set_histogram(x_min, x_max, y_min, y_max, center_colors);
   } else {
     mandelbrot_set = generate_mandelbrot_set(x_min, x_max, y_min, y_max, center_colors);
   }

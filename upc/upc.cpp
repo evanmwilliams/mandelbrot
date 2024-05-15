@@ -4,6 +4,8 @@
 #include <complex>
 #include <chrono>
 #include <cstdlib>
+#include <cassert>
+#include <upcxx/upcxx.hpp>
 
 int map_pixel_to_row(int pixel_y) {
     return pixel_y * NUM_ROWS / HEIGHT;
@@ -96,10 +98,16 @@ std::vector<Color> generate_mandelbrot_set(double x_min, double x_max, double y_
     return mandelbrot_set;
 }
 
-std::vector<int> generate_mandelbrot_set_histogram(double x_min, double x_max, double y_min, double y_max)
+std::vector<Color> generate_mandelbrot_set_histogram(double x_min, double x_max, double y_min, double y_max, const std::vector<Color>& palette)
 {
-    std::vector<int> mandelbrot_set(WIDTH * HEIGHT);
-    for (int y = 0; y < HEIGHT; ++y)
+    upcxx::init();
+
+    int y_start = upcxx::rank_me() * HEIGHT / upcxx::rank_n();
+    int y_end = std::min((upcxx::rank_me() + 1) * HEIGHT / upcxx::rank_n(), HEIGHT);
+    int MY_PROC_HEIGHT = y_end - y_start;
+
+    std::vector<int> mandelbrot_set(WIDTH * MY_PROC_HEIGHT);
+    for (int y = y_start; y < y_end; ++y)
     {
         double imag = y_min + (y_max - y_min) * y / (HEIGHT - 1);
         for (int x = 0; x < WIDTH; ++x)
@@ -107,30 +115,44 @@ std::vector<int> generate_mandelbrot_set_histogram(double x_min, double x_max, d
             double real = x_min + (x_max - x_min) * x / (WIDTH - 1);
             std::complex<double> c(real, imag);
             int iterations = mandelbrot(c);
-            mandelbrot_set[y * WIDTH + x] = iterations;
+            mandelbrot_set[(y - y_start) * WIDTH + x] = iterations;
         }
     }
-    return mandelbrot_set;
-}
+    //upcxx::barrier();
 
-std::vector<Color> color_histogram(const std::vector<int>& mandelbrot_set, const std::vector<Color>& palette) {
     std::vector<int> iterations_pp(MAX_ITER + 1, 0);
     float total_before_bail = 0.0;
-    for (int i = 0; i < WIDTH * HEIGHT; ++i) {
+    for (int i = 0; i < WIDTH * MY_PROC_HEIGHT; ++i) {
         iterations_pp[mandelbrot_set[i]]++;
         if(mandelbrot_set[i] < MAX_ITER) {
             total_before_bail+=1.0;
         }
     }
-    std::vector<std::vector<float>> hue(WIDTH, std::vector<float>(HEIGHT, 0.0));
+    upcxx::barrier();
+
+    auto vector_add = [](const std::vector<int>& a, const std::vector<int>& b) -> std::vector<int> {
+        std::vector<int> result(a.size());
+        for (size_t i = 0; i < a.size(); i++) {
+            result[i] = a[i] + b[i];
+        }
+        return result;
+    };
+
+    upcxx::future<std::vector<int>> final_iterations_future = upcxx::experimental::reduce_all_nontrivial(iterations_pp, vector_add, upcxx::world());
+    std::vector<int> final_iterations_pp = final_iterations_future.wait();
+
+    std::vector<std::vector<float>> hue(WIDTH, std::vector<float>(MY_PROC_HEIGHT, 0.0));
     for (int x = 0; x < WIDTH; x++){
-        for (int y = 0; y < HEIGHT; y++) {
+        for (int y = 0; y < MY_PROC_HEIGHT ; y++) {
             int iteration = mandelbrot_set[y * WIDTH + x];
             for (int i = 0; i <= iteration; i++) {
-                hue[x][y] += iterations_pp[i] / total_before_bail;
+                hue[x][y] += final_iterations_pp[i] / total_before_bail;
             }
         }
     }
+
+    upcxx::future<std::vector<std::vector<float>>> hue_future = upcxx::experimental::reduce_all_nontrivial(hue, vector_add, upcxx::world());
+    std::vector<std::vector<float>> hue_all = hue_future.wait();
 
     std::vector<Color> mandelbrot_colored(WIDTH * HEIGHT);
     for (int m = 0; m < WIDTH; m++) {
@@ -149,7 +171,12 @@ std::vector<Color> color_histogram(const std::vector<int>& mandelbrot_set, const
             }
             mandelbrot_colored[n * WIDTH + m] = color;
         }
-    }
-    return mandelbrot_colored;
-}
+    }    
+    // send all to rank 0
+    std::vector<Color> mandelbrot_colored_all(WIDTH * HEIGHT);
+    
 
+    upcxx::finalize();
+    return mandelbrot_colored_all;
+
+}

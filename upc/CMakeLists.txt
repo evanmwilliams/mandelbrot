@@ -4,7 +4,7 @@ project(upc LANGUAGES CXX)
 find_package(UPCXX REQUIRED)
 
 # Build the upc executable
-add_executable(upc main.cpp serial.cpp common.h)
+add_executable(upc main.cpp upc.cpp common.h)
 target_link_libraries(upc PRIVATE UPCXX::upcxx)
 target_compile_definitions(upc PRIVATE)
 

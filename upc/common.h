@@ -30,15 +30,12 @@ std::vector<Color> generate_mandelbrot_set(
     double y_max,
     const std::vector<Color>& center_colors);
 
-std::vector<int> generate_mandelbrot_set_histogram(
+std::vector<Color> generate_mandelbrot_set_histogram(
     double x_min,
     double x_max,
     double y_min,
-    double y_max);
-
-std::vector<Color> color_histogram(const std::vector<int>& mandelbrot_set, 
-                                   const std::vector<Color>& palette);
-
+    double y_max, 
+    const std::vector<Color>& palette);
 
 /*
 <palette>
