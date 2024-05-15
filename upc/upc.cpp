@@ -5,6 +5,7 @@
 #include <chrono>
 #include <cstdlib>
 #include <cassert>
+#include <stdexcept>
 #include <upcxx/upcxx.hpp>
 
 int map_pixel_to_row(int pixel_y)
@@ -184,18 +185,18 @@ std::vector<Color> generate_mandelbrot_set_histogram(double x_min, double x_max,
     upcxx::future<std::vector<int>> final_iterations_future = upcxx::experimental::reduce_all_nontrivial(iterations_pp, vector_add, upcxx::world());
     std::vector<int> final_iterations_pp = final_iterations_future.wait();
 
-    std::vector<std::vector<float>> hue(WIDTH, std::vector<float>(HEIGHT, 0.0));
     std::vector<Color> mandelbrot_set_colored(WIDTH * HEIGHT);
     for (int x = 0; x < WIDTH; x++)
     {
         for (int y = y_start; y < y_end; y++)
         {
-            int iteration = mandelbrot_set[y * WIDTH + x];
+            int iteration = mandelbrot_set[(y - y_start) * WIDTH + x];
+            float hue = 0.0;
             for (int i = 0; i <= iteration; i++)
             {
-                hue[x][y] += final_iterations_pp[i] / total_before_bail;
-                mandelbrot_set_colored[y * WIDTH + x] = get_color_from_hue(hue[x][y], palette);
+                hue += final_iterations_pp[i] / total_before_bail;
             }
+            mandelbrot_set_colored[y * WIDTH + x] = get_color_from_hue(hue, palette);
         }
     }
 
@@ -204,7 +205,7 @@ std::vector<Color> generate_mandelbrot_set_histogram(double x_min, double x_max,
         std::vector<Color> result(a.size(), {0, 0, 0});
         for (size_t i = 0; i < a.size(); i++)
         {
-            Color max_color = (b[i].r > a[i].r || b[i].g > a[i].g || b[i].b > a[i].b) ? b[i] : a[i];
+            Color max_color = (b[i].r >= a[i].r && b[i].g >= a[i].g && b[i].b >= a[i].b) ? b[i] : a[i];
             result[i] = max_color;
         }
         return result;
