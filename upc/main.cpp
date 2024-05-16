@@ -34,14 +34,13 @@ int main()
 
   const double x_min = -2.0, x_max = 1.0;
   const double y_min = -1.5, y_max = 1.5;
-  const int max_iterations = 1000;
   
   std::vector<Color> center_colors = assign_colors();
   //std::cout << "Center colors size: " << center_colors.size() << " and colors[0] is " << center_colors[0].r <<  std::endl;
   // Generate the Mandelbrot set
   std::vector<Color> mandelbrot_set;
   if(HISTOGRAM) {
-    mandelbrot_set = generate_mandelbrot_set_histogram(x_min, x_max, y_min, y_max, center_colors);
+    mandelbrot_set = generate_mandelbrot_set_histogram(x_min, x_max, y_min, y_max, gradient_samples);
   } else {
     mandelbrot_set = generate_mandelbrot_set(x_min, x_max, y_min, y_max, center_colors);
   }
